@@ -9,6 +9,52 @@ const Home = ({
 }) => {
   return (
     <div className="min-h-screen bg-gray-900" style={{ background: 'linear-gradient(135deg, #1f2937 0%, #000000 50%, #374151 100%)' }}>
+      {/* Add custom styles */}
+      <style>{`
+        .continue-game-btn {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+        }
+        .continue-game-btn:hover {
+          background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+          box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.3) !important;
+        }
+        
+        .new-game-btn {
+          background-color: rgba(55, 65, 81, 0.4);
+          border-color: rgba(75, 85, 99, 0.3);
+          backdrop-filter: blur(10px);
+        }
+        .new-game-btn:hover {
+          background-color: rgba(75, 85, 99, 0.6) !important;
+          border-color: rgba(107, 114, 128, 0.5) !important;
+          box-shadow: 0 10px 25px -5px rgba(75, 85, 99, 0.2) !important;
+        }
+        
+        .history-btn {
+          background-color: rgba(55, 65, 81, 0.2);
+          border-color: rgba(75, 85, 99, 0.2);
+          backdrop-filter: blur(10px);
+        }
+        .history-btn:hover {
+          background-color: rgba(75, 85, 99, 0.4) !important;
+          border-color: rgba(107, 114, 128, 0.4) !important;
+          box-shadow: 0 10px 25px -5px rgba(75, 85, 99, 0.15) !important;
+        }
+        
+        .manage-players-btn {
+          background-color: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+        .manage-players-btn:hover {
+          background-color: rgba(255, 255, 255, 0.08) !important;
+          border-color: rgba(255, 255, 255, 0.2) !important;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+        }
+      `}</style>
+
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-30"
@@ -32,7 +78,7 @@ const Home = ({
           <h1 className="text-3xl font-bold text-white mb-2">
             Stradl
           </h1>
-          <p className="text-gray-400 text-sm">Your poker community awaits</p>
+          <p className="text-gray-400 text-sm">...</p>
         </div>
 
         {/* Quick Stats */}
@@ -74,26 +120,14 @@ const Home = ({
           {currentGame && (
             <button
               onClick={() => onNavigate('game')}
-              className="group w-full rounded-2xl p-4 transition-all duration-300 transform hover:scale-105 shadow-lg"
-              style={{ 
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.2)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #34d399 0%, #10b981 100%)';
-                e.target.style.boxShadow = '0 20px 40px -10px rgba(16, 185, 129, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                e.target.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.2)';
-              }}
+              className="continue-game-btn group w-full rounded-2xl p-4 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               <div className="flex items-center justify-between">
                 <div className="text-left">
                   <div className="text-white font-semibold text-lg mb-1">Continue Game</div>
                   <div className="text-emerald-100 text-sm opacity-90">{currentGame.tableName}</div>
                 </div>
-                <div className="bg-white bg-opacity-20 rounded-full p-2 group-hover:bg-opacity-30 transition-all">
+                <div className="rounded-full p-2 transition-all">
                   <Play className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -103,22 +137,7 @@ const Home = ({
           {/* New Game Button */}
           <button
             onClick={() => onNavigate('setup')}
-            className="group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
-            style={{ 
-              backgroundColor: 'rgba(55, 65, 81, 0.4)',
-              borderColor: 'rgba(75, 85, 99, 0.3)',
-              backdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'rgba(75, 85, 99, 0.6)';
-              e.target.style.borderColor = 'rgba(107, 114, 128, 0.5)';
-              e.target.style.boxShadow = '0 10px 25px -5px rgba(75, 85, 99, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'rgba(55, 65, 81, 0.4)';
-              e.target.style.borderColor = 'rgba(75, 85, 99, 0.3)';
-              e.target.style.boxShadow = 'none';
-            }}
+            className="new-game-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
@@ -137,22 +156,7 @@ const Home = ({
           {/* Game History Button */}
           <button
             onClick={() => onNavigate('history')}
-            className="group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
-            style={{ 
-              backgroundColor: 'rgba(55, 65, 81, 0.2)',
-              borderColor: 'rgba(75, 85, 99, 0.2)',
-              backdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'rgba(75, 85, 99, 0.4)';
-              e.target.style.borderColor = 'rgba(107, 114, 128, 0.4)';
-              e.target.style.boxShadow = '0 10px 25px -5px rgba(75, 85, 99, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'rgba(55, 65, 81, 0.2)';
-              e.target.style.borderColor = 'rgba(75, 85, 99, 0.2)';
-              e.target.style.boxShadow = 'none';
-            }}
+            className="history-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
@@ -171,22 +175,7 @@ const Home = ({
           {/* Manage Players Button */}
           <button
             onClick={() => onNavigate('managePlayers')}
-            className="group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
-            style={{ 
-              backgroundColor: 'rgba(55, 65, 81, 0.2)',
-              borderColor: 'rgba(75, 85, 99, 0.2)',
-              backdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'rgba(75, 85, 99, 0.4)';
-              e.target.style.borderColor = 'rgba(107, 114, 128, 0.4)';
-              e.target.style.boxShadow = '0 10px 25px -5px rgba(75, 85, 99, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'rgba(55, 65, 81, 0.2)';
-              e.target.style.borderColor = 'rgba(75, 85, 99, 0.2)';
-              e.target.style.boxShadow = 'none';
-            }}
+            className="manage-players-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
@@ -195,7 +184,11 @@ const Home = ({
               </div>
               <div 
                 className="rounded-full p-2 transition-all"
-                style={{ backgroundColor: 'rgba(75, 85, 99, 0.2)' }}
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                }}
               >
                 <Users className="w-5 h-5 text-gray-300" />
               </div>
@@ -203,9 +196,9 @@ const Home = ({
           </button>
         </div>
 
-        {/* Bottom CTA */}
+        {/* Bottom CTA, can add something later */}
         <div className="mt-12 text-center">
-          <div className="text-gray-500 text-sm mb-4">Ready to play?</div>
+          <div className="text-gray-500 text-sm mb-4"></div>
           <div className="flex justify-center space-x-2">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
             <div 
