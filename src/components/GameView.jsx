@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Plus, Minus, DollarSign, Users, Clock, ArrowLeft, Receipt, Square, Lock, Unlock } from 'lucide-react';
+import { Plus, Minus, DollarSign, Users, Clock, ArrowLeft, Receipt, Square, Lock, Unlock, Check, X } from 'lucide-react';
 
 const GameView = ({ 
   currentGame, 
-  onUpdateGame, 
+  setCurrentGame, 
   onEndGame, 
-  onNavigate 
+  onNavigate,
+  playerProfiles = []
 }) => {
   // Local state for UI interactions
   const [showAddPlayer, setShowAddPlayer] = useState(false);
@@ -14,6 +15,8 @@ const GameView = ({
   const [showRebuyModal, setShowRebuyModal] = useState(false);
   const [rebuyPlayerId, setRebuyPlayerId] = useState(null);
   const [rebuyAmount, setRebuyAmount] = useState(currentGame?.defaultBuyIn || 30);
+  const [showPlayerSelector, setShowPlayerSelector] = useState(false);
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
 
   if (!currentGame) {
     return (
@@ -31,6 +34,11 @@ const GameView = ({
     );
   }
 
+  // Filter out players already in the game
+  const availablePlayers = playerProfiles.filter(profile => 
+    !currentGame.players.some(player => player.name === profile.name)
+  );
+
   const addPlayer = (playerData) => {
     const newPlayer = {
       id: Date.now().toString(),
@@ -39,7 +47,8 @@ const GameView = ({
       currentChips: playerData.buyIn,
       isActive: true,
       isLocked: false,
-      addedAt: new Date().toISOString()
+      addedAt: new Date().toISOString(),
+      profileId: null 
     };
     
     const updatedGame = {
@@ -48,7 +57,36 @@ const GameView = ({
       moneyOnTable: currentGame.moneyOnTable + newPlayer.buyIn
     };
     
-    onUpdateGame(updatedGame);
+    setCurrentGame(updatedGame);
+  };
+
+  const addSelectedPlayers = () => {
+    const newPlayers = selectedPlayers.map(playerId => {
+      const profile = playerProfiles.find(p => p.id === playerId);
+      return {
+        id: Date.now().toString() + Math.random(),
+        name: profile.name,
+        buyIn: newPlayerBuyIn,
+        currentChips: newPlayerBuyIn,
+        isActive: true,
+        isLocked: false,
+        addedAt: new Date().toISOString(),
+        profileId: profile.id
+      };
+    });
+
+    const totalBuyIn = newPlayers.reduce((sum, player) => sum + player.buyIn, 0);
+
+    const updatedGame = {
+      ...currentGame,
+      players: [...currentGame.players, ...newPlayers],
+      moneyOnTable: currentGame.moneyOnTable + totalBuyIn
+    };
+    
+    setCurrentGame(updatedGame);
+    setSelectedPlayers([]);
+    setShowPlayerSelector(false);
+    setShowAddPlayer(false);
   };
 
   const updatePlayerChips = (playerId, amount) => {
@@ -61,7 +99,7 @@ const GameView = ({
       )
     };
     
-    onUpdateGame(updatedGame);
+    setCurrentGame(updatedGame);
   };
 
   const toggleLockPlayer = (playerId) => {
@@ -74,7 +112,7 @@ const GameView = ({
       )
     };
     
-    onUpdateGame(updatedGame);
+    setCurrentGame(updatedGame);
   };
 
   const handleRebuy = () => {
@@ -93,7 +131,7 @@ const GameView = ({
             moneyOnTable: currentGame.moneyOnTable + rebuyAmount 
       };
       
-      onUpdateGame(updatedGame);
+      setCurrentGame(updatedGame);
     }
     setRebuyAmount(currentGame.defaultBuyIn);
     setRebuyPlayerId(null);
@@ -125,16 +163,18 @@ const GameView = ({
       .reduce((sum, player) => sum + player.currentChips, 0);
   };
 
-  const getMoneyOnTable = () => {
-    return currentGame.players
-      .filter(p => p.isActive)
-      .reduce((sum, player) => sum + player.currentChips, 0);
-  };
-
   const isOnePlayerLocked = currentGame.players.length > 0 &&
     currentGame.players.filter(p => p.isActive).some(p => p.isLocked);
   
   const totalsMatch = getTotalPot() === currentGame.moneyOnTable;
+
+  const togglePlayerSelection = (playerId) => {
+    setSelectedPlayers(prev => 
+      prev.includes(playerId) 
+        ? prev.filter(id => id !== playerId)
+        : [...prev, playerId]
+    );
+  };
 
   return (
     <>
@@ -197,17 +237,11 @@ const GameView = ({
             <div className="bg-gradient-to-br from-green-700 to-green-800 p-4 rounded-xl mb-4
                           shadow-[0_8px_20px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.25)]
                           border border-green-600/40 backdrop-blur-sm">
-              <h3 className="font-semibold mb-3 text-white">Add Player</h3>
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Player name"
-                  value={newPlayerName}
-                  onChange={(e) => setNewPlayerName(e.target.value)}
-                  className="w-full p-2 bg-green-800/80 border border-green-600/60 rounded 
-                           focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] backdrop-blur-sm"
-                />
+              <h3 className="font-semibold mb-3 text-white">Add Players</h3>
+              
+              {/* Buy-in amount input */}
+              <div className="mb-3">
+                <label className="block text-sm text-gray-300 mb-1">Buy-in amount for selected players</label>
                 <input
                   type="number"
                   placeholder="Buy-in amount"
@@ -217,33 +251,112 @@ const GameView = ({
                            focus:ring-2 focus:ring-green-500 focus:border-transparent
                            shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] backdrop-blur-sm"
                 />
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setShowAddPlayer(false)}
-                    className="flex-1 bg-gradient-to-b from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 
-                             p-2 rounded transition-all duration-200 
-                             shadow-[0_4px_8px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.4)]
-                             transform hover:translate-y-[-1px]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (newPlayerName) {
-                        addPlayer({ name: newPlayerName, buyIn: newPlayerBuyIn });
-                        setNewPlayerName('');
-                        setNewPlayerBuyIn(currentGame.defaultBuyIn);
-                        setShowAddPlayer(false);
-                      }
-                    }}
-                    className="flex-1 bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
-                             p-2 rounded transition-all duration-200 
-                             shadow-[0_4px_8px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.4)]
-                             transform hover:translate-y-[-1px]"
-                  >
-                    Add
-                  </button>
+              </div>
+
+              {/* Player selection tabs */}
+              <div className="flex space-x-2 mb-3">
+                <button
+                  onClick={() => setShowPlayerSelector(false)}
+                  className={`flex-1 bg-orange-500 hover:bg-orange-600 p-3 rounded-lg flex items-center justify-center space-x-2 
+                       transition-all duration-200 
+                       shadow-[0_6px_14px_rgba(0,0,0,0.35),0_3px_7px_rgba(0,0,0,0.25)] 
+                       hover:shadow-[0_8px_18px_rgba(0,0,0,0.45),0_4px_9px_rgba(0,0,0,0.35)]
+                       transform hover:translate-y-[-2px]`}
+                >
+                  Manual Entry
+                </button>
+                <button
+                  onClick={() => setShowPlayerSelector(true)}
+                  className={`flex-1 bg-green-600 hover:bg-green-700 p-3 rounded-lg flex items-center justify-center space-x-2 
+                       transition-all duration-200 
+                       shadow-[0_6px_14px_rgba(0,0,0,0.35),0_3px_7px_rgba(0,0,0,0.25)] 
+                       hover:shadow-[0_8px_18px_rgba(0,0,0,0.45),0_4px_9px_rgba(0,0,0,0.35)]
+                       transform hover:translate-y-[-2px]`}
+                >
+                  Select from Profiles ({availablePlayers.length})
+                </button>
+              </div>
+
+              {showPlayerSelector ? (
+                /* Player Profile Selector */
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {availablePlayers.length === 0 ? (
+                    <div className="text-center text-gray-400 py-4">
+                      <Users className="w-8 h-8 mx-auto mb-2" />
+                      <p>No available players</p>
+                      <p className="text-xs">All profiles are already in the game</p>
+                    </div>
+                  ) : (
+                    availablePlayers.map((profile) => (
+                      <div
+                        key={profile.id}
+                        onClick={() => togglePlayerSelection(profile.id)}
+                        className={`p-2 rounded cursor-pointer transition-all duration-200 flex items-center justify-between
+                          ${selectedPlayers.includes(profile.id)
+                            ? 'bg-blue-600/80 border border-blue-400'
+                            : 'bg-green-800/50 border border-green-600/40 hover:bg-green-800/70'
+                          }`}
+                      >
+                        <div>
+                          <div className="font-medium">{profile.name}</div>
+                          <div className="text-xs text-gray-300">
+                            {profile.stats.totalSessions} sessions | Venmo: @{profile.contactInfo.venmo}
+                          </div>
+                        </div>
+                        {selectedPlayers.includes(profile.id) && (
+                          <Check className="w-5 h-5 text-blue-300" />
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
+              ) : (
+                /* Manual Player Entry */
+                <input
+                  type="text"
+                  placeholder="Player name"
+                  value={newPlayerName}
+                  onChange={(e) => setNewPlayerName(e.target.value)}
+                  className="w-full p-2 bg-green-800/80 border border-green-600/60 rounded mb-3
+                           focus:ring-2 focus:ring-green-500 focus:border-transparent
+                           shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] backdrop-blur-sm"
+                />
+              )}
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    setShowAddPlayer(false);
+                    setShowPlayerSelector(false);
+                    setSelectedPlayers([]);
+                    setNewPlayerName('');
+                  }}
+                  className="flex-1 bg-gradient-to-b from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 
+                           p-2 rounded transition-all duration-200 
+                           shadow-[0_4px_8px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.4)]
+                           transform hover:translate-y-[-1px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (showPlayerSelector && selectedPlayers.length > 0) {
+                      addSelectedPlayers();
+                    } else if (!showPlayerSelector && newPlayerName) {
+                      addPlayer({ name: newPlayerName, buyIn: newPlayerBuyIn });
+                      setNewPlayerName('');
+                      setNewPlayerBuyIn(currentGame.defaultBuyIn);
+                      setShowAddPlayer(false);
+                    }
+                  }}
+                  disabled={showPlayerSelector ? selectedPlayers.length === 0 : !newPlayerName}
+                  className="flex-1 bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
+                           p-2 rounded transition-all duration-200 
+                           shadow-[0_4px_8px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.4)]
+                           transform hover:translate-y-[-1px] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add {showPlayerSelector && selectedPlayers.length > 1 ? `(${selectedPlayers.length})` : ''}
+                </button>
               </div>
             </div>
           )}
@@ -264,7 +377,26 @@ const GameView = ({
                   backdrop-blur-sm">
                     <div className="flex justify-between items-center mb-2">
                       <div>
-                        <div className="font-semibold text-lg text-white drop-shadow-sm">{player.name}</div>
+                        <div className="flex items-center space-x-2">
+                          {(() => {
+                            const profile = player.profileId 
+                                ? playerProfiles.find(p => p.id === player.profileId)
+                                : null;
+                            const hasProfile = !!profile;
+                            return (
+                              <>
+                                <div className={`font-semibold text-lg text-white drop-shadow-sm`}>
+                                  {player.name}
+                                </div>
+                                {profile?.contactInfo.venmo && (
+                                  <div className="text-blue-300 text-sm">
+                                    @{profile.contactInfo.venmo}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
                         <div className="text-sm">
                           <span className="text-gray-200">Buy-in: ${player.buyIn}</span> |
                           <span className={profit >= 0 ? "text-green-300 ml-1" : "text-red-300 ml-1"}>

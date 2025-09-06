@@ -44,6 +44,50 @@ const PokerCashGameApp = () => {
     localStorage.setItem('playerProfiles', JSON.stringify(playerProfiles));
   }, [playerProfiles]);
 
+  // Helper function to update player statistics
+  const updatePlayerStats = (gameData) => {
+    setPlayerProfiles(prevProfiles => {
+      return prevProfiles.map(profile => {
+        // Find this player in the game using profileId instead of name
+        const playerInGame = gameData.players.find(p => p.profileId === profile.id);
+        
+        if (!playerInGame) {
+          return profile; // Player wasn't in this game or was manually added
+        }
+
+        // Calculate profit/loss for this session
+        const sessionProfit = playerInGame.currentChips - playerInGame.buyIn;
+        
+        // Create new session record
+        const newSession = {
+          gameId: gameData.id,
+          date: gameData.endTime,
+          buyIn: playerInGame.buyIn,
+          cashOut: playerInGame.currentChips,
+          profit: sessionProfit,
+          duration: gameData.endTime && gameData.startTime ? 
+            Math.round((new Date(gameData.endTime) - new Date(gameData.startTime)) / (1000 * 60)) : 0 // minutes
+        };
+
+        // Update cumulative stats
+        const newStats = {
+          totalSessions: profile.stats.totalSessions + 1,
+          totalBuyIns: profile.stats.totalBuyIns + playerInGame.buyIn,
+          totalCashOuts: profile.stats.totalCashOuts + playerInGame.currentChips,
+          netProfit: profile.stats.netProfit + sessionProfit,
+          biggestWin: Math.max(profile.stats.biggestWin, sessionProfit),
+          biggestLoss: Math.min(profile.stats.biggestLoss, sessionProfit)
+        };
+
+        return {
+          ...profile,
+          sessions: [...profile.sessions, newSession],
+          stats: newStats
+        };
+      });
+    });
+  };
+
   // Game management functions
   const startNewGame = (gameSettings) => {
     const newGame = {
@@ -62,11 +106,16 @@ const PokerCashGameApp = () => {
   };
 
   const endGame = () => {
+    if (!currentGame) return;
+    
     const finalGame = {
       ...currentGame,
       endTime: new Date().toISOString(),
       isActive: false
     };
+    
+    // Update player statistics before ending the game
+    updatePlayerStats(finalGame);
     
     setGameHistory(prev => [finalGame, ...prev]);
     setCurrentGame(null);
@@ -125,6 +174,7 @@ const PokerCashGameApp = () => {
             setCurrentGame={setCurrentGame}
             onEndGame={endGame}
             onNavigate={setCurrentView}
+            playerProfiles={playerProfiles}
           />
         );
       case 'history':
