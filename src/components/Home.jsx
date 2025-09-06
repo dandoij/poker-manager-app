@@ -12,7 +12,7 @@ const Home = ({
       <div className="max-w-md mx-auto">
         <h1 className="text-4xl font-extrabold text-center mb-10 text-green-100 border-b border-yellow-600/40 pb-2"
           style={{ fontFamily: "'Quantico', sans-serif", fontSize: '2.5rem' }}>
-          Chipply
+          Straddl
         </h1>
         
         <div className="space-y-4">
