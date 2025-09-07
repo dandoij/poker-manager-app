@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, History, Play, Users, TrendingUp, Trophy } from 'lucide-react';
+import { Plus, History, Play, Users, TrendingUp, Trophy, LifeBuoy } from 'lucide-react';
 
 const Home = ({ 
   currentGame, 
@@ -73,12 +73,12 @@ const Home = ({
               boxShadow: '0 25px 50px -12px rgba(16, 185, 129, 0.25)'
             }}
           >
-            <span className="text-2xl font-bold text-white">S</span>
+            <LifeBuoy className="text-2xl font-bold text-white"></LifeBuoy>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
             Stradl
           </h1>
-          <p className="text-gray-400 text-sm">...</p>
+          <p className="text-gray-400 text-sm"></p>
         </div>
 
         {/* Quick Stats */}
@@ -100,10 +100,9 @@ const Home = ({
           <div 
             className="rounded-xl p-4 border"
             style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.06)',
-              borderColor: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)'
+              backgroundColor: 'rgba(55, 65, 81, 0.3)',
+              borderColor: 'rgba(75, 85, 99, 0.2)',
+              backdropFilter: 'blur(10px)'
             }}
           >
             <div className="flex items-center gap-2 mb-1">
@@ -156,7 +155,7 @@ const Home = ({
           {/* Game History Button */}
           <button
             onClick={() => onNavigate('history')}
-            className="history-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
+            className="new-game-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
@@ -175,7 +174,7 @@ const Home = ({
           {/* Manage Players Button */}
           <button
             onClick={() => onNavigate('managePlayers')}
-            className="manage-players-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
+            className="new-game-btn group w-full rounded-2xl p-4 border transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between">
               <div className="text-left">

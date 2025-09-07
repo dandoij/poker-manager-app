@@ -613,8 +613,7 @@ const GameView = ({
                      flex items-center justify-center space-x-3 
                      transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              <Users className="w-5 h-5" />
-              <span>Add Player</span>
+              <Plus className="w-5 h-5" />
             </button>
             
             <div className="grid grid-cols-2 gap-3">
